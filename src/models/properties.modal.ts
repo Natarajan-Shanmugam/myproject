@@ -1,6 +1,5 @@
 import { DataTypes, Model, Optional, Sequelize } from "sequelize";
 import { sequelize } from "../config/database";
-import  User from "./user.model"; // Import User model for association
 
 // Define attributes interface
 interface PropertyAttributes {
@@ -10,8 +9,8 @@ interface PropertyAttributes {
   property_city: string;
   property_price: number;
   file_id?: string;
-  created_by: number;
-  updated_by: number;
+  created_by?: number;
+  updated_by?: number;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -37,7 +36,7 @@ export class Property extends Model<PropertyAttributes, PropertyCreationAttribut
 Property.init(
   {
     property_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
@@ -62,11 +61,11 @@ Property.init(
       allowNull: true,
     },
     created_by: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     updated_by: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     created_at: {

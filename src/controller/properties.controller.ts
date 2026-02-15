@@ -4,7 +4,7 @@ import { PropertiesService } from "../services/properties.service";
 export class PropertiesController {
 
     static async insert(req: Request, res: Response) {
-        console.log('AddProperties req.body: ', req.body)
+        console.log('@PropertiesController @method insert');
         try {
             req.body.property_id = Number(req.params.property_id);
             const user = await PropertiesService.AddProperties(req.body);
@@ -15,7 +15,7 @@ export class PropertiesController {
     }
 
     static async list(req: Request, res: Response) {
-        console.log('AddProperties req.body: ', req.body)
+        console.log('@PropertiesController @method list');
         try {
             const user = await PropertiesService.ListProperties();
             res.status(201).json(user);
@@ -25,7 +25,7 @@ export class PropertiesController {
     }
 
     static async remove(req: Request, res: Response) {
-        console.log('AddProperties req.body: ', req.params)
+        console.log('@PropertiesController @method remove');
         try {
             const property_id = Number(req.params.property_id);
             const user = await PropertiesService.RemoveProperties(property_id);

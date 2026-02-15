@@ -49,21 +49,9 @@ async function startServer() {
       console.log("📦 Database synced");
     }
 
-    const server = app.listen(PORT, () => {
+    app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-
-    // Graceful shutdown (important for PM2)
-    const shutdown = async () => {
-      console.log("🛑 Shutting down gracefully...");
-      await sequelize.close();
-      server.close(() => {
-        process.exit(0);
-      });
-    };
-
-    process.on("SIGINT", shutdown);
-    process.on("SIGTERM", shutdown);
 
   } catch (error) {
     console.error("❌ Unable to connect to DB:", error);
