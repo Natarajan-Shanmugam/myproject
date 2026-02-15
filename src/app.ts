@@ -1,17 +1,19 @@
-import dotenv from "dotenv";
-dotenv.config();
 
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { sequelize } from "./config/database";
-import userRoutes from "./routes/user";
+
+import auth_router from "./routes/auth.routes";
+import user_router from "./routes/user.routes";
+import properties_router from "./routes/properties.routes";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.TRUSTYPLOTS_PORT || 5000;
 
 // Trust proxy (important if behind Nginx / AWS Load Balancer)
 app.set("trust proxy", 1);
+
 
 // Security headers
 app.use(helmet());
@@ -27,10 +29,12 @@ app.use(
 app.use(express.json());
 
 // Routes
-app.use("/api/users", userRoutes);
+app.use("/auth", auth_router);
+app.use("/users", user_router);
+app.use("/properties", properties_router);
 
-app.get("/api/health", (_, res) => {
-  res.status(200).json({ status: "OK" });
+app.get("/health-check", (_, res) => {
+  res.status(200).json({ status: "Trustyplots API working fine!" });
 });
 
 // Start Server

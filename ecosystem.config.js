@@ -9,12 +9,12 @@ module.exports = {
 			watch: false,
 			max_memory_restart: "300M",
 			env: {
-				NODE_ENV: "production",
-				DB_HOST: "aws-dev-db-instance.cshuyeeqmtp4.us-east-1.rds.amazonaws.com",
-				DB_USER: "postgres",
-				DB_PASSWORD: "awsdbtn56m8160",
-				DB_NAME: "dev-db",
-				DB_PORT: 5432
+				NODE_ENV: process.env.TRUSTYPLOTS_ENV,
+				DB_HOST: process.env.TRUSTYPLOTS_DB_HOST,
+				DB_USER: process.env.TRUSTYPLOTS_DB_USER,
+				DB_PASSWORD: process.env.TRUSTYPLOTS_DB_PASSWORD,
+				DB_NAME: process.env.TRUSTYPLOTS_DB_NAME,
+				DB_PORT: process.env.TRUSTYPLOTS_DB_PORT
 			}
 		}
 	]
