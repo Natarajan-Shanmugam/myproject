@@ -1,4 +1,4 @@
-import User from "../models/user.model";
+import User from "../models/user_details.model";
 
 export class UserService {
     static async ListUsers() {

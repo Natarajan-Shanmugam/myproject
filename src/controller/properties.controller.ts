@@ -6,7 +6,8 @@ export class PropertiesController {
     static async insert(req: Request, res: Response) {
         console.log('@PropertiesController @method insert');
         try {
-            req.body.property_id = Number(req.params.property_id);
+            req.body.created_by = 1;
+            req.body.updated_by = 1;
             const user = await PropertiesService.AddProperties(req.body);
             res.status(201).json(user);
         } catch (err) {
@@ -29,6 +30,17 @@ export class PropertiesController {
         try {
             const property_id = Number(req.params.property_id);
             const user = await PropertiesService.RemoveProperties(property_id);
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
+        static async SeedData(req: Request, res: Response) {
+        console.log('@PropertiesController @method SeedData');
+        try {
+            const seed_type =  String(req.params.type);
+            const user = await PropertiesService.SeedData(seed_type);
             res.status(201).json(user);
         } catch (err) {
             res.status(400).json({ error: err });

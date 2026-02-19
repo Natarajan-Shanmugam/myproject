@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import User from "../models/user.model";
+import User from "../models/user_details.model";
 import { AuthController } from "../controller/auth.controller";
 
 const auth_router = Router();
