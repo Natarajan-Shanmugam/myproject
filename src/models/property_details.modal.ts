@@ -2,72 +2,86 @@ import { DataTypes, Model, Optional, Sequelize } from "sequelize";
 import { sequelize } from "../config/database";
 
 // Define attributes interface
-interface PropertyAttributes {
+class PropertyDetails extends Model {
   property_id?: number;
-  property_status?: string;
+  property_status_id?: number;
   property_type_id?: number;
-  property_listing_type?: string;
+  property_available_status_id?: number;
   property_title?: string;
+  property_description?: string;
+  property_area?: number;
   property_price?: number;
   contact_number?: number;
   file_id?: string;
+  property_location_id?: number;
+  negotiable?: boolean;
+  youtube_link?: string;
+  instagram_link?: string;
   created_by?: number;
   updated_by?: number;
   created_at?: Date;
   updated_at?: Date;
 }
 
-// Define model class
-export class Property extends Model<PropertyAttributes> implements PropertyAttributes {
-  public property_id!: number;
-  public property_status!: string;
-  public property_type_id!: number;
-  public property_listing_type!: string;
-  public property_title!: string;
-  public property_price!: number;
-  public contact_number!: number;
-  public file_id?: string;
-  public created_by!: number;
-  public updated_by!: number;
-  public created_at!: Date;
-  public updated_at!: Date;
-}
-
 // Initialize the model
-Property.init(
+PropertyDetails.init(
   {
     property_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    property_status: {
-      type: DataTypes.STRING(50),
+    property_status_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     property_type_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    property_listing_type: {
-      type: DataTypes.STRING(50),
+    property_available_status_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-        property_title: {
+    property_title: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    property_description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    property_area: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    negotiable: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
     },
     property_price: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-     contact_number: {
-      type: DataTypes.INTEGER,
+    contact_number: {
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     file_id: {
       type: DataTypes.STRING(100),
       allowNull: true,
+    },
+    property_location_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    youtube_link: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    instagram_link: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     created_by: {
       type: DataTypes.INTEGER,
@@ -94,3 +108,5 @@ Property.init(
     updatedAt: "updated_at", // Map updatedAt
   }
 );
+
+export default PropertyDetails;

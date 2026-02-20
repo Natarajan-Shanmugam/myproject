@@ -1,13 +1,22 @@
 import { Request, Response } from "express";
 import { PropertiesService } from "../services/properties.service";
 
+interface reqUser extends Request {
+    user?: {
+        id?: number
+    }
+}
+
 export class PropertiesController {
 
-    static async insert(req: Request, res: Response) {
+    static async insert(req: reqUser, res: Response) {
         console.log('@PropertiesController @method insert');
         try {
-            req.body.created_by = 1;
-            req.body.updated_by = 1;
+
+            console.log('req user_id ', req?.user?.id)
+
+            req.body.created_by = req?.user?.id;
+            req.body.updated_by = req?.user?.id;
             const user = await PropertiesService.AddProperties(req.body);
             res.status(201).json(user);
         } catch (err) {
@@ -15,10 +24,12 @@ export class PropertiesController {
         }
     }
 
-    static async list(req: Request, res: Response) {
+    static async list(req: reqUser, res: Response) {
         console.log('@PropertiesController @method list');
+        console.log('req user_id ', req?.user?.id)
         try {
-            const user = await PropertiesService.ListProperties();
+            const user_id: any = req?.user?.id;
+            const user = await PropertiesService.ListProperties(user_id);
             res.status(201).json(user);
         } catch (err) {
             res.status(400).json({ error: err });
@@ -36,11 +47,10 @@ export class PropertiesController {
         }
     }
 
-        static async SeedData(req: Request, res: Response) {
+    static async SeedData(req: Request, res: Response) {
         console.log('@PropertiesController @method SeedData');
         try {
-            const seed_type =  String(req.params.type);
-            const user = await PropertiesService.SeedData(seed_type);
+            const user = await PropertiesService.SeedData();
             res.status(201).json(user);
         } catch (err) {
             res.status(400).json({ error: err });

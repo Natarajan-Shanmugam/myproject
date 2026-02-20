@@ -8,6 +8,6 @@ const properties_router = Router();
 properties_router.post("/insert", authMiddleware,  PropertiesController.insert);
 properties_router.delete("/remove/:property_id", authMiddleware,  PropertiesController.remove);
 properties_router.get("/list", authMiddleware,  PropertiesController.list);
-properties_router.get("/seed-data/:type", authMiddleware,  PropertiesController.SeedData);
+properties_router.get("/seed-data", authMiddleware,  PropertiesController.SeedData);
 
 export default properties_router;

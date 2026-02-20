@@ -4,7 +4,6 @@ import { sequelize } from "../config/database";
 // Define attributes interface
 interface PropertyAttributes {
   property_location_id?: number;
-  property_id?: number;
   city?: string;
   area?: string;
   landmark?: string;
@@ -20,7 +19,6 @@ interface PropertyAttributes {
 // Define model class
 export class PropertyLocations extends Model<PropertyAttributes> implements PropertyAttributes {
   public property_location_id!: number;
-  public property_id!: number;
   public city!: string;
   public area!: string;
   public landmark!: string;
@@ -40,10 +38,6 @@ PropertyLocations.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
-    },
-    property_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
     },
     city: {
       type: DataTypes.STRING,
