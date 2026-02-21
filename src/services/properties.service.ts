@@ -39,7 +39,7 @@ export class PropertiesService {
         try {
             if (property_id && property_location_id) {
                 // Update existing property
-                await PropertyDetails.update(propertyFields, { where: { property_id }, returning: true });
+                await PropertyDetails.update(propertyFields, { where: { property_id } });
                 const property_details_update_response = await PropertyDetails.findByPk(property_id, { raw: true });
                 await PropertyLocations.update(property_location, { where: { property_location_id } });
                 console.log('@Service PropertiesService @Method AddProperties @Message: Property details updated!')

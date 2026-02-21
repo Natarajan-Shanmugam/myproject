@@ -36,6 +36,7 @@ app.use("/users", user_router);
 app.use("/properties", properties_router);
 
 app.get("/health-check", (_, res) => {
+  console.log('health-check: Trustyplots API working fine!');
   res.status(200).json({ status: "Trustyplots API working fine!" });
 });
 
@@ -52,7 +53,7 @@ async function startServer() {
     }
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🚀 Trustyplots API Server running on port ${PORT}`);
     });
 
   } catch (error) {
