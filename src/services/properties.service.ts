@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import PropertyDetails from "../models/property_details.modal";
 import { PropertyLocations } from "../models/property_locations.modal";
 import PropertyType from "../models/property_type.model";
@@ -33,14 +36,14 @@ export class PropertiesService {
 
         const { property_id, property_location_id, city, area, landmark, ...propertyFields } = data;
         const property_location = { city, area, landmark }
-
         try {
             if (property_id && property_location_id) {
                 // Update existing property
-                await PropertyDetails.update(propertyFields, { where: { property_id } });
+                await PropertyDetails.update(propertyFields, { where: { property_id }, returning: true });
+                const property_details_update_response = await PropertyDetails.findByPk(property_id, { raw: true });
                 await PropertyLocations.update(property_location, { where: { property_location_id } });
                 console.log('@Service PropertiesService @Method AddProperties @Message: Property details updated!')
-                return { staus: true, message: "Property details updated!" };
+                return { staus: true, message: "Property details updated!", data: property_details_update_response };
             } else {
                 // Create new property
                 let property_locations_res = await PropertyLocations.create({
@@ -49,10 +52,9 @@ export class PropertiesService {
                     landmark
                 });
 
-                await PropertyDetails.create({ ...propertyFields, property_location_id: property_locations_res.property_location_id });
-
+                const property_details_create_response = await PropertyDetails.create({ ...propertyFields, property_location_id: property_locations_res.property_location_id });
                 console.log('@Service PropertiesService @Method AddProperties @Message: Property details created!')
-                return { staus: true, message: "Property details created!" };
+                return { staus: true, message: "Property details created!", data: property_details_create_response };
             }
         } catch (error) {
             console.error('@Service PropertiesService @Error: ', error);
@@ -108,7 +110,7 @@ export class PropertiesService {
     static async UploadFile(input: any, files: any) {
         console.log('@Service PropertiesService @method UploadFile file: ');
         console.log('@Service PropertiesService @method UploadFile input', input);
-
+        console.log('process.env.AWS_REGION: ', process.env.AWS_REGION)
         try {
 
             const property = await PropertyDetails.findOne({
