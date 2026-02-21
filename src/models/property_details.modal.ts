@@ -12,7 +12,7 @@ class PropertyDetails extends Model {
   property_area?: number;
   property_price?: number;
   contact_number?: number;
-  file_id?: string;
+  file_upload_ids?: string[];
   property_location_id?: number;
   negotiable?: boolean;
   youtube_link?: string;
@@ -60,15 +60,15 @@ PropertyDetails.init(
       allowNull: false,
     },
     property_price: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     contact_number: {
       type: DataTypes.BIGINT,
       allowNull: false,
     },
-    file_id: {
-      type: DataTypes.STRING(100),
+    file_upload_ids: {
+      type:  DataTypes.ARRAY(DataTypes.INTEGER),  // ✅ MUST pass inner type
       allowNull: true,
     },
     property_location_id: {

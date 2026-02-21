@@ -56,4 +56,28 @@ export class PropertiesController {
             res.status(400).json({ error: err });
         }
     }
+
+    static async UploadFile(req: Request, res: Response) {
+        console.log('@PropertiesController @method UploadFile req.file: ', req.file);
+        try {
+
+            const [input, files] = [req.body, req.files]
+
+            const user = await PropertiesService.UploadFile(input, files);
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
+    static async GetSignedURL(req: Request, res: Response) {
+        console.log('@PropertiesController @method SeedData');
+        try {
+            const file_key = req.body.file_key;
+            const user = await PropertiesService.GetSignedURL(file_key);
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
 }
