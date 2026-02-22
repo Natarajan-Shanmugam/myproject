@@ -59,6 +59,11 @@ export class PropertiesController {
 
     static async UploadFile(req: Request, res: Response) {
         console.log('@PropertiesController @method UploadFile req.file: ', req.file);
+
+        if (!Number(req.body.property_id)) {
+            return { message: "Missing field: property_id" }
+        }
+
         try {
 
             const [input, files] = [req.body, req.files]

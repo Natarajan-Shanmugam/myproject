@@ -7,10 +7,10 @@ import PropertyType from "../models/property_type.model";
 import PropertyStatus from "../models/property_status.model";
 import PropertyAvailStatus from "../models/property_available_status.model";
 import { sequelize } from "../config/database";
-import { QueryTypes } from "sequelize";
+import { QueryTypes, Op } from "sequelize";
 import { Request, Response } from "express";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3 } from "../config/s3Config";
+import { s3, bulkDeleteFromS3 } from "../config/s3Config";
 import { v4 as uuidv4 } from "uuid";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -78,6 +78,44 @@ export class PropertiesService {
         console.log('@Service PropertiesService @method RemoveProperties @data::property_id ', property_id);
 
         try {
+
+            const find_file_upload_ids = await PropertyDetails.findByPk(property_id, {
+                raw: true,
+            });
+
+            if (find_file_upload_ids?.file_upload_ids?.length) {
+
+                const fileUploadIds = find_file_upload_ids.file_upload_ids;
+
+                // Step 2: fetch file_key from FileUpload table
+                const files = await FileUpload.findAll({
+                    where: {
+                        file_upload_id: {
+                            [Op.in]: fileUploadIds,
+                        },
+                    },
+                    attributes: ["file_key"],
+                    raw: true,
+                });
+
+                //form file_key array
+                const file_list_for_remove = files.map(file => file.file_key);
+
+                //bulk delete from S3
+                if (file_list_for_remove.length) {
+                    await bulkDeleteFromS3(file_list_for_remove);
+                }
+
+                await FileUpload.destroy({ where: { file_upload_id: { [Op.in]: fileUploadIds, }, } });
+
+                // Step 5: optional → clear property reference
+                // await PropertyDetails.update({ file_upload_ids: [] }, { where: { property_id } });
+
+                console.log('Property images are removed: ', file_list_for_remove);
+
+            }
+
+
             await PropertyDetails.destroy({ where: { property_id: property_id, } });
             await PropertyLocations.destroy({ where: { property_location_id: property_id, } });
             return { staus: true, message: "Removed property details!" };
