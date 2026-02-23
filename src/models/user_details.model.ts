@@ -1,11 +1,12 @@
 import { DataTypes, Model } from "sequelize";
-import {sequelize} from "../config/database";
+import { sequelize } from "../config/database";
 
 class User extends Model {
   declare id: number;
   declare name: string;
   declare email: string;
   declare password: string;
+  declare is_admin: boolean
 }
 
 User.init(
@@ -26,6 +27,10 @@ User.init(
     },
     password: {
       type: DataTypes.STRING,
+      allowNull: true
+    },
+    is_admin: {
+      type: DataTypes.BOOLEAN,
       allowNull: true
     },
   },

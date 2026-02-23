@@ -17,6 +17,7 @@ class PropertyDetails extends Model {
   negotiable?: boolean;
   youtube_link?: string;
   instagram_link?: string;
+  seo_title?: string;
   created_by?: number;
   updated_by?: number;
   created_at?: Date;
@@ -89,6 +90,10 @@ PropertyDetails.init(
     },
     updated_by: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    seo_title: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     created_at: {

@@ -29,7 +29,19 @@ export class PropertiesController {
         console.log('req user_id ', req?.user?.id)
         try {
             const user_id: any = req?.user?.id;
-            const user = await PropertiesService.ListProperties(user_id);
+            const user = await PropertiesService.ListProperties(user_id, false);
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
+    static async listPublic(req: reqUser, res: Response) {
+        console.log('@PropertiesController @method listPublic');
+        console.log('req user_id ', req?.user?.id)
+        try {
+            const user_id: any = req?.user?.id;
+            const user = await PropertiesService.ListProperties(user_id, true);
             res.status(201).json(user);
         } catch (err) {
             res.status(400).json({ error: err });
@@ -69,6 +81,17 @@ export class PropertiesController {
             const [input, files] = [req.body, req.files]
 
             const user = await PropertiesService.UploadFile(input, files);
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
+    static async RemoveImage(req: Request, res: Response) {
+        console.log('@PropertiesController @method remove');
+        try {
+            const { property_id, file_upload_id } = req.params;
+            const user = await PropertiesService.RemoveImage(Number(property_id), Number(file_upload_id));
             res.status(201).json(user);
         } catch (err) {
             res.status(400).json({ error: err });

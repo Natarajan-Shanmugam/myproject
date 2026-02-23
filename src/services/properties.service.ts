@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import FileUpload from "../models/file_uploads";
+import User from "../models/user_details.model";
 
 interface PropertyData {
     property_id?: number;
@@ -62,11 +63,23 @@ export class PropertiesService {
         }
     }
 
-    static async ListProperties(user_id: number) {
+    static async ListProperties(user_id: number, listPublic: boolean) {
         console.log('@Service PropertiesService @Method ListProperties');
 
         try {
-            const property_lists = await sequelize.query(await this.PropertyListQuery(user_id), { type: QueryTypes.SELECT });
+
+            let user_filter = ``;
+            const user_res = await User.findOne({ where: { is_admin: true }, raw: true }); //if public api get admin entered details only
+            if (listPublic) {
+                if (!user_res) {
+                    return { staus: true, message: "Property list not found!" };
+                }
+                user_filter = `where pd.created_by = ${user_res?.id}`;
+            } else if (user_id) {
+                user_filter = `where pd.created_by = ${user_id}`
+            }
+
+            const property_lists = await sequelize.query(await this.PropertyListQuery(user_filter), { type: QueryTypes.SELECT });
             console.log('@Service PropertiesService @Method ListProperties @Message:Property list loaded! Total: ' + property_lists.length)
             return { staus: true, message: "Property list loaded! Total: " + property_lists.length, data: property_lists };
         } catch (error) {
@@ -203,6 +216,7 @@ export class PropertiesService {
                 );
 
             }
+            console.log('@Service PropertiesService @Method UploadFile @Message: File uploaded successfully');
             return {
                 message: "File uploaded successfully",
                 count: uploadedFiles.length,
@@ -212,6 +226,34 @@ export class PropertiesService {
         } catch (error) {
             console.log('@Service PropertiesService @Error: ', error);
             return error
+        }
+    }
+
+    static async RemoveImage(property_id: number, file_upload_id: number) {
+        console.log('@Service PropertiesService @method RemoveProperties ');
+
+        try {
+
+            const file_upload_res = await FileUpload.findByPk(file_upload_id, { raw: true });
+            const file_remove_res = await FileUpload.destroy({ where: { file_upload_id: file_upload_id } });
+
+            if (file_remove_res) {
+                await PropertyDetails.update({
+                    file_upload_ids: sequelize.literal(`array_remove(file_upload_ids, ${file_upload_id})`)
+                },
+                    { where: { property_id: Number(property_id) } });
+
+                console.log('file_remove_res: ', file_remove_res)
+
+                //remove s3 file
+                await bulkDeleteFromS3([`${file_upload_res?.file_key}`]);
+
+
+                return { message: "Image removed successfully" };
+            }
+            return { message: "Image not removed" };
+        } catch (error) {
+            console.log('@Service PropertiesService @Error: ', error)
         }
     }
 
@@ -236,7 +278,7 @@ export class PropertiesService {
         }
     }
 
-    static async PropertyListQuery(user_id: number) {
+    static async PropertyListQuery(user_filter: string) {
         const query = ` 
         SELECT 
             pd.property_id,
@@ -273,7 +315,7 @@ export class PropertiesService {
                 JOIN property_status ps ON (pd.property_status_id = ps.property_status_id)
                 JOIN property_available_status pas ON (pd.property_available_status_id = pas.property_available_status_id)
                 JOIN property_locations pl ON (pd.property_location_id = pl.property_location_id)
-                where pd.created_by = ${user_id}`
+                ${user_filter}`
         return query;
     }
 }
