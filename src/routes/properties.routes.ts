@@ -13,7 +13,10 @@ properties_router.get("/seed-data", authMiddleware, PropertiesController.SeedDat
 properties_router.post("/file-upload", [authMiddleware, upload.array("files", 10)], PropertiesController.UploadFile);
 properties_router.post("/get-signed-url", authMiddleware, PropertiesController.GetSignedURL);
 
-properties_router.get("/list-public", PropertiesController.listPublic);
 properties_router.delete("/remove-image/:property_id/:file_upload_id", authMiddleware, PropertiesController.RemoveImage);
+
+//Public API
+properties_router.get("/list-public", PropertiesController.listPublic);
+properties_router.get("/list-details-public/:property_id", authMiddleware, PropertiesController.ListDetailsPublic);
 
 export default properties_router;

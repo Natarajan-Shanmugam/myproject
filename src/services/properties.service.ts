@@ -68,7 +68,7 @@ export class PropertiesService {
 
         try {
 
-            let user_filter = ``;
+            let user_filter = ``, column_filter = ``;
             const user_res = await User.findOne({ where: { is_admin: true }, raw: true }); //if public api get admin entered details only
             if (listPublic) {
                 if (!user_res) {
@@ -77,9 +77,10 @@ export class PropertiesService {
                 user_filter = `where pd.created_by = ${user_res?.id}`;
             } else if (user_id) {
                 user_filter = `where pd.created_by = ${user_id}`
+                column_filter = `pd.contact_number,`
             }
 
-            const property_lists = await sequelize.query(await this.PropertyListQuery(user_filter), { type: QueryTypes.SELECT });
+            const property_lists = await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT });
             console.log('@Service PropertiesService @Method ListProperties @Message:Property list loaded! Total: ' + property_lists.length)
             return { staus: true, message: "Property list loaded! Total: " + property_lists.length, data: property_lists };
         } catch (error) {
@@ -128,9 +129,8 @@ export class PropertiesService {
 
             }
 
-
             await PropertyDetails.destroy({ where: { property_id: property_id, } });
-            await PropertyLocations.destroy({ where: { property_location_id: property_id, } });
+            await PropertyLocations.destroy({ where: { property_location_id: find_file_upload_ids?.property_location_id, } });
             return { staus: true, message: "Removed property details!" };
         } catch (error) {
             console.log('@Service PropertiesService @Error: ', error)
@@ -257,6 +257,31 @@ export class PropertiesService {
         }
     }
 
+    static async ListDetailsPublic(property_id: number) {
+        console.log('@Service PropertiesService @Method ListDetailsPublic');
+        try {
+
+            let user_filter = ``, column_filter = ``;
+            const user_res = await User.findOne({ where: { is_admin: true }, raw: true }); //if public api get admin entered details only
+
+            if (!user_res) {
+                return { staus: true, message: "Property list not found!" };
+            }
+
+            user_filter = `where pd.created_by = ${user_res?.id} and pd.property_id = ${property_id}`;
+            const property_lists = await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT });
+            console.log('@Service PropertiesService @Method ListDetailsPublic @Message:Property list loaded! Total: ' + property_lists.length)
+
+            if (property_lists.length) {
+                return { staus: true, message: "Property details list loaded! Total: " + property_lists.length, data: property_lists };
+            }
+            return { staus: false, message: "Property details list not found!" };
+
+        } catch (error) {
+            console.log('@Service PropertiesService @Error: ', error)
+        }
+    }
+
     static async GetSignedURL(file_key: string) {
         console.log('@Service PropertiesService @method RemoveProperties ');
 
@@ -278,7 +303,7 @@ export class PropertiesService {
         }
     }
 
-    static async PropertyListQuery(user_filter: string) {
+    static async PropertyListQuery(user_filter: string, column_filter: string) {
         const query = ` 
         SELECT 
             pd.property_id,
@@ -296,10 +321,11 @@ export class PropertiesService {
             pd.youtube_link,
             pd.instagram_link,
             pd.property_price,
-            pd.contact_number,
+            ${column_filter}
             pl.city,
             pl.area,
             pl.landmark,
+            pd.seo_title,
              (SELECT COALESCE(
                  jsonb_agg(
                  jsonb_build_object(

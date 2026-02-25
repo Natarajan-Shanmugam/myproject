@@ -98,6 +98,20 @@ export class PropertiesController {
         }
     }
 
+    static async ListDetailsPublic(req: reqUser, res: Response) {
+        console.log('@PropertiesController @method ListDetailsPublic');
+        if (!Number(req.params.property_id)) {
+            return { status: false, message: "Missing Property ID" }
+        }
+        try {
+            const property_id = Number(req.params.property_id);
+            const user = await PropertiesService.ListDetailsPublic(property_id);
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
     static async GetSignedURL(req: Request, res: Response) {
         console.log('@PropertiesController @method SeedData');
         try {
