@@ -16,6 +16,8 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import FileUpload from "../models/file_uploads";
 import User from "../models/user_details.model";
+import { EmailService } from "../services/email.service";
+
 
 interface PropertyData {
     property_id?: number;
@@ -255,6 +257,20 @@ export class PropertiesService {
                 return { message: "Image removed successfully" };
             }
             return { message: "Image not removed" };
+        } catch (error) {
+            console.log('@Service PropertiesService @Error: ', error)
+        }
+    }
+
+    static async SentContactUsEmail(input: any) {
+        console.log('@Service PropertiesService @method SentEmail ');
+
+        try {
+
+            let email = await EmailService.sendEmail(input);
+
+            return email;
+
         } catch (error) {
             console.log('@Service PropertiesService @Error: ', error)
         }

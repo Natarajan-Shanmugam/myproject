@@ -106,6 +106,25 @@ export class PropertiesController {
         }
     }
 
+    static async SentEmail(req: Request, res: Response) {
+        console.log('@PropertiesController @method SentEmail');
+
+        if (!req.body) {
+            return { message: "Missing field" }
+        }
+
+        try {
+
+            const input = req.body;
+            const send_email = await PropertiesService.SentContactUsEmail(input);
+            console.log('@PropertiesController @method SentEmail send_email: ', send_email);
+            res.status(201).json(send_email);
+
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
     static async ListDetailsPublic(req: reqUser, res: Response) {
         console.log('@PropertiesController @method ListDetailsPublic');
         if (!Number(req.params.property_id)) {
@@ -158,6 +177,17 @@ export class PropertiesController {
             let input = req.body;
             input.user_id = (req?.query?.is_local_admin === 'true') ? 2 : null;
             const user = await PropertiesService.propertyFilter(input);
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
+    static async SendEmail(req: Request, res: Response) {
+        console.log('@PropertiesController @method propertyFilter');
+        try {
+            let input = req.body;
+            const user = await PropertiesService.SentContactUsEmail(input);
             res.status(201).json(user);
         } catch (err) {
             res.status(400).json({ error: err });
