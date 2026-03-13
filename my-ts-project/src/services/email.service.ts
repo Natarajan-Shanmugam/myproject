@@ -11,7 +11,13 @@ export class EmailService {
 
   static async sendEmail(email_template_data: any) {
 
-    const template_name = 'contact_us_email_template';
+    const currentDate = new Date();
+
+    email_template_data.current_year = currentDate.getFullYear();      // 2026
+    email_template_data.current_date = currentDate.toLocaleDateString("en-IN"); // 13/3/2026
+
+    // const template_name = 'contact_us_email_template'; 
+    const template_name = 'trustyplots-email-template';
 
     const filePath = path.join(__dirname, `../assets/email-template/${template_name}.html`);
     const source = fs.readFileSync(filePath, "utf8");
@@ -19,15 +25,17 @@ export class EmailService {
     const html = template(email_template_data);
 
     const email_input_data = {
-      from_email: 'trustyplots27@gmail.com',
-      to_email: 'natrajan.raj@gmail.com',
-      email_subject: 'Welcome to TrustyPlots Test'
+      from_email: String(process.env.TRUSTYPLOTS_FROM_EMAIL),
+      to_email: String(process.env.TRUSTYPLOTS_TO_EMAIL),
+      cc_email: String(process.env.TRUSTYPLOTS_CC_EMAIL),
+      email_subject: 'TrustyPlots | ' + email_template_data.property_title + ' | ' + email_template_data.current_date,
     }
 
     const params = {
       Source: email_input_data.from_email, // verified sender
       Destination: {
         ToAddresses: [email_input_data.to_email],
+        CcAddresses: [email_input_data.cc_email], // add CC here
       },
       Message: {
         Subject: {

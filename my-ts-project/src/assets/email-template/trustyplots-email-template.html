@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>New Property Submission</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body style="margin:0;padding:0;background:#dbebf7;font-family:'Lato',Arial,sans-serif;">
+
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#dbebf7;padding:40px 0;">
+        <tr>
+            <td align="center">
+
+                <!-- Container -->
+                <table width="100%"
+                    style="max-width:800px;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+
+                    <!-- Logo -->
+                    <tr>
+                        <td align="center" style="padding:25px ;background:#ffffff;border-bottom:1px solid #eee;">
+                            <img src="https://trustyplots.com/logo/logo-1.png" alt="TrustyPlots"
+                                style="max-width:200px;">
+                        </td>
+                    </tr>
+
+                    <!-- Title -->
+                    <tr>
+                        <td style="padding: 30px 40px;">
+                            <h3 style="margin:0;color:#333;">New Property Submission - {{submission_date}}</h3>
+                            <p style="color:#666;margin-top:8px;">A new property has been submitted on TrustyPlots.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Property Details -->
+                    <tr>
+                        <td style="padding:0 40px 40px 40px;">
+
+                            <table width="100%" cellpadding="10" cellspacing="0"
+                                style="border-collapse:collapse;font-size: 15px;">
+
+                                <tr>
+                                    <td width="30%"><strong>Property Title</strong></td>
+                                    <td>{{property_title}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>Property Type</strong></td>
+                                    <td>{{property_type}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>Sale / Rent</strong></td>
+                                    <td>{{listing_type}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>City</strong></td>
+                                    <td>{{city}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>Area</strong></td>
+                                    <td>{{area}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>Price</strong></td>
+                                    <td>{{price}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>Property Size</strong></td>
+                                    <td>{{property_size}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>Description</strong></td>
+                                    <td>{{description}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td><strong>Owner Phone Number</strong></td>
+                                    <td>{{owner_phone}}</td>
+                                </tr>
+
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="padding:25px;background:#ffffff;border-top:1px solid #eee;">
+                            <p style="margin:0;color:#348ebc;font-size:16px;font-weight: bold;">
+                                © {{current_year}} TrustyPlots — Property Listing Platform
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+
+</html>
