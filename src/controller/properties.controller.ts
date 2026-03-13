@@ -39,9 +39,17 @@ export class PropertiesController {
     static async listPublic(req: reqUser, res: Response) {
         console.log('@PropertiesController @method listPublic');
         console.log('req user_id ', req?.user?.id)
+        console.log('req is_local_admin:  ', (req?.query?.is_local_admin))
         try {
+
             const user_id: any = req?.user?.id;
-            const user = await PropertiesService.ListProperties(user_id, true);
+            let user;
+            if ((req?.query?.is_local_admin === 'true')) {
+                user = await PropertiesService.ListProperties(2, false);
+            } else {
+                user = await PropertiesService.ListProperties(user_id, true);
+            }
+
             res.status(201).json(user);
         } catch (err) {
             res.status(400).json({ error: err });
@@ -98,6 +106,25 @@ export class PropertiesController {
         }
     }
 
+    static async SentEmail(req: Request, res: Response) {
+        console.log('@PropertiesController @method SentEmail');
+
+        if (!req.body) {
+            return { message: "Missing field" }
+        }
+
+        try {
+
+            const input = req.body;
+            const send_email = await PropertiesService.SentContactUsEmail(input);
+            console.log('@PropertiesController @method SentEmail send_email: ', send_email);
+            res.status(201).json(send_email);
+
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
     static async ListDetailsPublic(req: reqUser, res: Response) {
         console.log('@PropertiesController @method ListDetailsPublic');
         if (!Number(req.params.property_id)) {
@@ -105,7 +132,8 @@ export class PropertiesController {
         }
         try {
             const property_id = Number(req.params.property_id);
-            const user = await PropertiesService.ListDetailsPublic(property_id);
+            const user_id: any = (req?.query?.is_local_admin === 'true') ? 2 : null;
+            const user = await PropertiesService.ListDetailsPublic(property_id, user_id);
             res.status(201).json(user);
         } catch (err) {
             res.status(400).json({ error: err });
@@ -113,10 +141,53 @@ export class PropertiesController {
     }
 
     static async GetSignedURL(req: Request, res: Response) {
-        console.log('@PropertiesController @method SeedData');
+        console.log('@PropertiesController @method GetSignedURL');
         try {
             const file_key = req.body.file_key;
             const user = await PropertiesService.GetSignedURL(file_key);
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
+    static async propertyLocationsDropdown(req: Request, res: Response) {
+        console.log('@PropertiesController @method propertyLocationsDropdown');
+        try {
+            const user = await PropertiesService.propertyLocationsDropdown();
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
+    static async propertyStatusDropdown(req: Request, res: Response) {
+        console.log('@PropertiesController @method propertyStatusDropdown');
+        try {
+            const user = await PropertiesService.propertyStatusDropdown();
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
+    static async propertyFilter(req: Request, res: Response) {
+        console.log('@PropertiesController @method propertyFilter');
+        try {
+            let input = req.body;
+            input.user_id = (req?.query?.is_local_admin === 'true') ? 2 : null;
+            const user = await PropertiesService.propertyFilter(input);
+            res.status(201).json(user);
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
+    }
+
+    static async SendEmail(req: Request, res: Response) {
+        console.log('@PropertiesController @method propertyFilter');
+        try {
+            let input = req.body;
+            const user = await PropertiesService.SentContactUsEmail(input);
             res.status(201).json(user);
         } catch (err) {
             res.status(400).json({ error: err });

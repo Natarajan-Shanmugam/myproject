@@ -17,6 +17,11 @@ properties_router.delete("/remove-image/:property_id/:file_upload_id", authMiddl
 
 //Public API
 properties_router.get("/list-public", PropertiesController.listPublic);
-properties_router.get("/list-details-public/:property_id", authMiddleware, PropertiesController.ListDetailsPublic);
+properties_router.get("/list-details-public/:property_id/:seo_title", PropertiesController.ListDetailsPublic);
+properties_router.get("/property-locations-dropdown", PropertiesController.propertyLocationsDropdown);
+properties_router.get("/property-status-dropdown", PropertiesController.propertyStatusDropdown);
+properties_router.post("/property-filter", PropertiesController.propertyFilter);
+
+properties_router.post("/send-email", PropertiesController.SendEmail);
 
 export default properties_router;

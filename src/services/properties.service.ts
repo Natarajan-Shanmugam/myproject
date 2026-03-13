@@ -16,6 +16,8 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import FileUpload from "../models/file_uploads";
 import User from "../models/user_details.model";
+import { EmailService } from "../services/email.service";
+
 
 interface PropertyData {
     property_id?: number;
@@ -27,6 +29,7 @@ interface PropertyData {
     city: string,
     area: string,
     landmark: string,
+    seo_title: string,
     created_by?: number;
     updated_by?: number;
 }
@@ -38,6 +41,8 @@ export class PropertiesService {
         const { property_id, property_location_id, city, area, landmark, ...propertyFields } = data;
         const property_location = { city, area, landmark }
         try {
+
+            propertyFields.seo_title = propertyFields.seo_title.toLowerCase().trim().replace(/\s+/g, "-");
             if (property_id && property_location_id) {
                 // Update existing property
                 await PropertyDetails.update(propertyFields, { where: { property_id } });
@@ -64,7 +69,7 @@ export class PropertiesService {
     }
 
     static async ListProperties(user_id: number, listPublic: boolean) {
-        console.log('@Service PropertiesService @Method ListProperties');
+        console.log('@Service PropertiesService @Method ListProperties user_id: ', user_id, 'listPublic: ', listPublic);
 
         try {
 
@@ -257,14 +262,31 @@ export class PropertiesService {
         }
     }
 
-    static async ListDetailsPublic(property_id: number) {
-        console.log('@Service PropertiesService @Method ListDetailsPublic');
+    static async SentContactUsEmail(input: any) {
+        console.log('@Service PropertiesService @method SentEmail ');
+
+        try {
+
+            let email = await EmailService.sendEmail(input);
+
+            return email;
+
+        } catch (error) {
+            console.log('@Service PropertiesService @Error: ', error)
+        }
+    }
+
+    static async ListDetailsPublic(property_id: number, user_id: number) {
+        console.log('@Service PropertiesService @Method ListDetailsPublic property_id: ', property_id, 'user_id ', user_id);
         try {
 
             let user_filter = ``, column_filter = ``;
-            const user_res = await User.findOne({ where: { is_admin: true }, raw: true }); //if public api get admin entered details only
+            const user_res: any = await User.findOne({ where: { is_admin: true }, raw: true }); //if public api get admin entered details only
 
-            if (!user_res) {
+            if (user_id) {
+                user_res.id = user_id
+            }
+            else if (!user_res) {
                 return { staus: true, message: "Property list not found!" };
             }
 
@@ -276,6 +298,87 @@ export class PropertiesService {
                 return { staus: true, message: "Property details list loaded! Total: " + property_lists.length, data: property_lists };
             }
             return { staus: false, message: "Property details list not found!" };
+
+        } catch (error) {
+            console.log('@Service PropertiesService @Error: ', error)
+        }
+    }
+
+    static async propertyLocationsDropdown() {
+        console.log('@Service PropertiesService @Method propertyLocationsDropdown');
+        try {
+
+            const property_loc_drp_down = await sequelize.query(await this.PropertyLocationDropDownDetails(), { type: QueryTypes.SELECT });
+            console.log('@Service PropertiesService @Method propertyLocationsDropdown @Message:Property list loaded! Total: ' + property_loc_drp_down.length)
+
+            if (property_loc_drp_down.length) {
+                return { staus: true, message: "Property locations list loaded! Total: " + property_loc_drp_down.length, data: property_loc_drp_down };
+            }
+            return { staus: false, message: "Property locations list not found!" };
+
+        } catch (error) {
+            console.log('@Service PropertiesService @Error: ', error)
+        }
+    }
+
+    static async propertyStatusDropdown() {
+        console.log('@Service PropertiesService @method propertyStatusDropdown ');
+
+        try {
+
+            return {
+                staus: true,
+                message: "Seed data loaded!",
+                data: {
+                    property_status: await PropertyStatus.findAll(),
+
+                }
+            };
+
+        } catch (error) {
+            console.log('@Service PropertiesService @Error: ', error)
+        }
+    }
+
+    static async propertyFilter(input: any) {
+        console.log('@Service PropertiesService @Method propertyFilter input: ', input);
+        try {
+
+            let user_filter = ``, column_filter = ``;
+            const user_res: any = await User.findOne({ where: { is_admin: true }, raw: true }); //if public api get admin entered details only
+
+            if (input.user_id) {
+                user_res.id = input.user_id
+            } else if (!user_res) {
+                return { staus: true, message: "Property list not found!" };
+            }
+
+            user_filter = `where pd.created_by = ${user_res?.id} `;
+            if (input.city && input.city.toLowerCase() !== 'all') {
+                user_filter += ` AND pl.city ILIKE '%${input.city}%'`;
+            }
+
+            //Property status filter: Sale/Rent
+            if (input.property_status && input.property_status.toLowerCase() !== 'all') {
+                user_filter += ` AND ps.property_status_name ILIKE '%${input.property_status}%'`;
+            }
+
+            //Property status filter: Plot, Villa etc
+            if (input.property_type && input.property_type.toLowerCase() !== 'all') {
+                user_filter += ` AND pt.property_type_name ILIKE '%${input.property_type}%'`;
+            }
+
+            if (input.property_title && input.property_title.toLowerCase() !== 'all') {
+                user_filter += ` AND pd.property_title ILIKE '%${input.property_title}%'`;
+            }
+
+            const property_lists = await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT });
+            console.log('@Service PropertiesService @Method propertyFilter @Message:Property list loaded! Total: ' + property_lists.length)
+
+            if (property_lists.length) {
+                return { staus: true, message: "Filtered Property list loaded! Total: " + property_lists.length, data: property_lists };
+            }
+            return { staus: false, message: "Filtered Property list not found!" };
 
         } catch (error) {
             console.log('@Service PropertiesService @Error: ', error)
@@ -344,4 +447,21 @@ export class PropertiesService {
                 ${user_filter}`
         return query;
     }
+
+    static async PropertyLocationDropDownDetails() {
+        return ` 
+            SELECT DISTINCT ON (pl.city)
+                pl.property_location_id,
+                pl.city,
+                pl.area,
+                pl.landmark
+            FROM property_details pd
+            JOIN property_locations pl 
+                ON pd.property_location_id = pl.property_location_id
+            JOIN user_details ud 
+                ON pd.created_by = ud.id
+            WHERE ud.is_admin IS TRUE
+            ORDER BY pl.city, pl.property_location_id;`
+    }
+
 }
