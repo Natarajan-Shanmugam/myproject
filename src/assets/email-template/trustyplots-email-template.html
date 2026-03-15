@@ -27,7 +27,7 @@
 
                     <!-- Title -->
                     <tr>
-                        <td style="padding: 30px 40px;">
+                        <td style="padding: 30px 40px 10px 40px;">
                             <h3 style="margin:0;color:#333;">New Property Submission - {{current_date}}</h3>
                             <p style="color:#666;margin-top:8px;">A new property has been submitted on TrustyPlots.</p>
                         </td>
@@ -35,54 +35,54 @@
 
                     <!-- Property Details -->
                     <tr>
-                        <td style="padding:0 40px 40px 40px;">
+                        <td style="padding:0 40px 0 30px;">
 
                             <table width="100%" cellpadding="10" cellspacing="0"
                                 style="border-collapse:collapse;font-size: 15px;">
 
                                 <tr>
-                                    <td width="30%"><strong>Property Title</strong></td>
-                                    <td>{{property_title}}</td>
+                                    <td width="25%"><strong>Property Title</strong></td>
+                                    <td>: {{property_title}}</td>
                                 </tr>
 
                                 <tr>
                                     <td><strong>Property Type</strong></td>
-                                    <td>{{property_type}}</td>
+                                    <td>: {{property_type}}</td>
                                 </tr>
 
                                 <tr>
                                     <td><strong>Sale / Rent</strong></td>
-                                    <td>{{listing_type}}</td>
+                                    <td>: {{listing_type}}</td>
                                 </tr>
 
                                 <tr>
                                     <td><strong>City</strong></td>
-                                    <td>{{city}}</td>
+                                    <td>: {{city}}</td>
                                 </tr>
 
                                 <tr>
                                     <td><strong>Area</strong></td>
-                                    <td>{{area}}</td>
+                                    <td>: {{area}}</td>
                                 </tr>
 
                                 <tr>
                                     <td><strong>Price</strong></td>
-                                    <td>{{price}}</td>
+                                    <td>: {{price}}</td>
                                 </tr>
 
                                 <tr>
                                     <td><strong>Property Size</strong></td>
-                                    <td>{{property_size}}</td>
+                                    <td>: {{property_size}}</td>
                                 </tr>
 
                                 <tr>
                                     <td><strong>Description</strong></td>
-                                    <td>{{description}}</td>
+                                    <td>: {{description}}</td>
                                 </tr>
 
                                 <tr>
                                     <td><strong>Owner Phone Number</strong></td>
-                                    <td>{{owner_phone}}</td>
+                                    <td>: {{owner_phone}}</td>
                                 </tr>
 
                             </table>
@@ -95,13 +95,12 @@
                         <td style="padding:0 40px 40px 40px;">
                             <h3 style="margin-bottom:15px;color:#333;">Uploaded Property Images</h3>
 
-                            <table width="100%" cellpadding="5" cellspacing="0">
+                            <table width="100%" >
                                 <tr>
 
                                     {{#each attachement_files}}
-                                    <td align="center">
-                                        <img src="{{file_url}}" alt="{{file_name}}"
-                                            style="width:220px;height:auto;border-radius:6px;border:1px solid #eee;">
+                                    <td align="left">
+                                        <img src="{{file_url}}" alt="{{file_name}}" style="width:220px;height:160px;object-fit:cover;border-radius:6px;border:1px solid #eee;">
                                     </td>
                                     {{/each}}
 
