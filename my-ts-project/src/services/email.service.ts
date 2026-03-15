@@ -11,10 +11,15 @@ export class EmailService {
 
   static async sendEmail(email_template_data: any) {
 
+    console.log('sendEmail email_template_data: ', email_template_data);
+
     const currentDate = new Date();
 
     email_template_data.current_year = currentDate.getFullYear();      // 2026
     email_template_data.current_date = currentDate.toLocaleDateString("en-IN"); // 13/3/2026
+
+    email_template_data.price = "₹" + new Intl.NumberFormat("en-IN").format(email_template_data.price);
+    email_template_data.property_size = email_template_data.property_size + ' (sqft)';
 
     // const template_name = 'contact_us_email_template'; 
     const template_name = 'trustyplots-email-template';
@@ -58,4 +63,6 @@ export class EmailService {
     }
 
   }
+
+
 }

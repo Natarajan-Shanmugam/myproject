@@ -262,10 +262,17 @@ export class PropertiesService {
         }
     }
 
-    static async SentContactUsEmail(input: any) {
+    static async SentContactUsEmail(input: any, files: any) {
         console.log('@Service PropertiesService @method SentEmail ');
 
         try {
+
+            const is_files_exists = files as Express.Multer.File[];
+
+            if (is_files_exists) {
+                let attach_res: any = await this.UploadAttachementFile(input, files)
+                input.attachement_files = attach_res?.data
+            }
 
             let email = await EmailService.sendEmail(input);
 
@@ -273,6 +280,66 @@ export class PropertiesService {
 
         } catch (error) {
             console.log('@Service PropertiesService @Error: ', error)
+        }
+    }
+
+    static async UploadAttachementFile(input: any, files: any) {
+        console.log('@Service PropertiesService @method UploadFile file: ');
+        console.log('@Service PropertiesService @method UploadFile input', input);
+        console.log('process.env.AWS_REGION: ', process.env.AWS_REGION)
+        try {
+
+            const multi_files = files as Express.Multer.File[];
+
+            if (!multi_files || multi_files.length === 0) {
+                return { message: "No file uploaded" };
+            }
+
+            const uploadedFiles = [];
+            const uploadedIds = [];
+
+            for (const file of multi_files) {
+                const fileKey = `attachements/${uuidv4()}-${file.originalname}`;
+
+                const command = new PutObjectCommand({
+                    Bucket: process.env.AWS_BUCKET_NAME,
+                    Key: fileKey,
+                    Body: file.buffer,
+                    ContentType: file.mimetype,
+                    ContentDisposition: `attachment; filename="${file.originalname}"`,
+                });
+
+                await s3.send(command);
+
+                const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+
+                // Save in DB
+                const savedFile = await FileUpload.create({
+                    file_name: file.originalname,
+                    file_key: fileKey,
+                    file_url: fileUrl,
+                    file_size: file.size,
+                    mime_type: file.mimetype,
+                    is_email_attachement: true
+                });
+
+                uploadedFiles.push({
+                    file_name: file.originalname,
+                    file_url: fileUrl,
+                });
+                uploadedIds.push(savedFile.file_upload_id);
+
+            }
+            console.log('@Service PropertiesService @Method UploadFile @Message: File uploaded successfully');
+            return {
+                message: "File uploaded successfully",
+                count: uploadedFiles.length,
+                data: uploadedFiles,
+            };
+
+        } catch (error) {
+            console.log('@Service PropertiesService @Error: ', error);
+            return error
         }
     }
 

@@ -9,6 +9,7 @@ class FileUpload extends Model {
   public file_url!: string;
   public file_size!: number;
   public mime_type!: string;
+  is_email_attachement!: boolean;
 }
 
 FileUpload.init(
@@ -23,6 +24,7 @@ FileUpload.init(
     file_url: DataTypes.TEXT,
     file_size: DataTypes.BIGINT,
     mime_type: DataTypes.STRING,
+    is_email_attachement: DataTypes.BOOLEAN,
   },
   {
     sequelize,

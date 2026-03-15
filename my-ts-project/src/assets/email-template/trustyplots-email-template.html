@@ -28,7 +28,7 @@
                     <!-- Title -->
                     <tr>
                         <td style="padding: 30px 40px;">
-                            <h3 style="margin:0;color:#333;">New Property Submission - {{submission_date}}</h3>
+                            <h3 style="margin:0;color:#333;">New Property Submission - {{current_date}}</h3>
                             <p style="color:#666;margin-top:8px;">A new property has been submitted on TrustyPlots.</p>
                         </td>
                     </tr>
@@ -85,6 +85,27 @@
                                     <td>{{owner_phone}}</td>
                                 </tr>
 
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Property Images -->
+                    <tr>
+                        <td style="padding:0 40px 40px 40px;">
+                            <h3 style="margin-bottom:15px;color:#333;">Uploaded Property Images</h3>
+
+                            <table width="100%" cellpadding="5" cellspacing="0">
+                                <tr>
+
+                                    {{#each attachement_files}}
+                                    <td align="center">
+                                        <img src="{{file_url}}" alt="{{file_name}}"
+                                            style="width:220px;height:auto;border-radius:6px;border:1px solid #eee;">
+                                    </td>
+                                    {{/each}}
+
+                                </tr>
                             </table>
 
                         </td>

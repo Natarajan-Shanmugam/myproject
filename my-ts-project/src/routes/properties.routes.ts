@@ -22,6 +22,6 @@ properties_router.get("/property-locations-dropdown", PropertiesController.prope
 properties_router.get("/property-status-dropdown", PropertiesController.propertyStatusDropdown);
 properties_router.post("/property-filter", PropertiesController.propertyFilter);
 
-properties_router.post("/send-email", PropertiesController.SendEmail);
+properties_router.post("/send-email", upload.array("files", 5), PropertiesController.SendEmail);
 
 export default properties_router;
