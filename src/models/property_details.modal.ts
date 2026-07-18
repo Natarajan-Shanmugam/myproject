@@ -12,7 +12,7 @@ class PropertyDetails extends Model {
   property_area?: number;
   property_price?: number;
   contact_number?: number;
-  file_upload_ids?: string[];
+  file_upload_ids?: string;
   property_location_id?: number;
   negotiable?: boolean;
   youtube_link?: string;
@@ -69,7 +69,7 @@ PropertyDetails.init(
       allowNull: false,
     },
     file_upload_ids: {
-      type:  DataTypes.ARRAY(DataTypes.INTEGER),  // ✅ MUST pass inner type
+      type: DataTypes.TEXT, // stored as Postgres array-literal text, e.g. "{86,87}"
       allowNull: true,
     },
     property_location_id: {

@@ -47,10 +47,10 @@ async function startServer() {
     console.log("✅ Database connected successfully");
 
     // ⚠️ Never auto-sync in production
-    if (process.env.NODE_ENV !== "production") {
-      await sequelize.sync();
-      console.log("📦 Database synced");
-    }
+    // if (process.env.NODE_ENV !== "production") {
+    //   await sequelize.sync();
+    //   console.log("📦 Database synced");
+    // }
 
     app.listen(PORT, () => {
       console.log(`🚀 Trustyplots API Server running on port ${PORT}`);

@@ -35,6 +35,18 @@ interface PropertyData {
 }
 
 export class PropertiesService {
+    static parseFileUploadIds(value: any): number[] {
+        if (Array.isArray(value)) return value;
+        if (typeof value === 'string') {
+            return value.replace(/[{}]/g, '').split(',').filter(Boolean).map(Number);
+        }
+        return [];
+    }
+
+    static formatFileUploadIds(ids: number[]): string {
+        return `{${ids.join(',')}}`;
+    }
+
     static async AddProperties(data: PropertyData) {
         console.log('@Service PropertiesService @Method AddProperties  @data: ', data);
 
@@ -85,7 +97,7 @@ export class PropertiesService {
                 column_filter = `pd.contact_number,`
             }
 
-            const property_lists = await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT });
+            const property_lists = this.parsePropertyListJsonFields(await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT }));
             console.log('@Service PropertiesService @Method ListProperties @Message:Property list loaded! Total: ' + property_lists.length)
             return { staus: true, message: "Property list loaded! Total: " + property_lists.length, data: property_lists };
         } catch (error) {
@@ -102,9 +114,9 @@ export class PropertiesService {
                 raw: true,
             });
 
-            if (find_file_upload_ids?.file_upload_ids?.length) {
+            const fileUploadIds = this.parseFileUploadIds(find_file_upload_ids?.file_upload_ids);
 
-                const fileUploadIds = find_file_upload_ids.file_upload_ids;
+            if (fileUploadIds.length) {
 
                 // Step 2: fetch file_key from FileUpload table
                 const files = await FileUpload.findAll({
@@ -177,7 +189,7 @@ export class PropertiesService {
                 return { message: "No property details found!" }
             }
 
-            const existingIds = property?.file_upload_ids || [];
+            const existingIds = this.parseFileUploadIds(property?.file_upload_ids);
 
             const multi_files = files as Express.Multer.File[];
 
@@ -216,7 +228,7 @@ export class PropertiesService {
 
                 //update file to property
                 await PropertyDetails.update(
-                    { file_upload_ids: [...existingIds, ...uploadedIds] },
+                    { file_upload_ids: this.formatFileUploadIds([...existingIds, ...uploadedIds]) },
                     { where: { property_id: Number(input.property_id) } }
                 );
 
@@ -243,8 +255,11 @@ export class PropertiesService {
             const file_remove_res = await FileUpload.destroy({ where: { file_upload_id: file_upload_id } });
 
             if (file_remove_res) {
+                const property = await PropertyDetails.findByPk(Number(property_id), { raw: true });
+                const remainingIds = this.parseFileUploadIds(property?.file_upload_ids).filter(id => id !== file_upload_id);
+
                 await PropertyDetails.update({
-                    file_upload_ids: sequelize.literal(`array_remove(file_upload_ids, ${file_upload_id})`)
+                    file_upload_ids: this.formatFileUploadIds(remainingIds)
                 },
                     { where: { property_id: Number(property_id) } });
 
@@ -358,7 +373,7 @@ export class PropertiesService {
             }
 
             user_filter = `where pd.created_by = ${user_res?.id} and pd.property_id = ${property_id}`;
-            const property_lists = await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT });
+            const property_lists = this.parsePropertyListJsonFields(await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT }));
             console.log('@Service PropertiesService @Method ListDetailsPublic @Message:Property list loaded! Total: ' + property_lists.length)
 
             if (property_lists.length) {
@@ -439,7 +454,7 @@ export class PropertiesService {
                 user_filter += ` AND pd.property_title ILIKE '%${input.property_title}%'`;
             }
 
-            const property_lists = await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT });
+            const property_lists = this.parsePropertyListJsonFields(await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT }));
             console.log('@Service PropertiesService @Method propertyFilter @Message:Property list loaded! Total: ' + property_lists.length)
 
             if (property_lists.length) {
@@ -473,6 +488,15 @@ export class PropertiesService {
         }
     }
 
+    static parsePropertyListJsonFields(property_lists: any[]) {
+        return property_lists.map((property: any) => ({
+            ...property,
+            file_upload_details: typeof property.file_upload_details === 'string'
+                ? JSON.parse(property.file_upload_details)
+                : property.file_upload_details,
+        }));
+    }
+
     static async PropertyListQuery(user_filter: string, column_filter: string) {
         const query = ` 
         SELECT 
@@ -496,15 +520,42 @@ export class PropertiesService {
             pl.area,
             pl.landmark,
             pd.seo_title,
-             (SELECT COALESCE(
-                 jsonb_agg(
-                 jsonb_build_object(
-                    'file_upload_id', fu.file_upload_id,
-                    'file_name', fu.file_name,
-                    'file_url', fu.file_url)
-            ), '[]'::jsonb)
-            FROM file_uploads fu
-            WHERE fu.file_upload_id = ANY(pd.file_upload_ids)) AS file_upload_details
+            (
+                SELECT COALESCE(
+                    json_group_array(
+                        json_object(
+                            'file_upload_id', fu.file_upload_id,
+                            'file_name', fu.file_name,
+                            'file_url', fu.file_url
+                        )
+                    ),
+                    '[]'
+                )
+                FROM file_uploads fu
+                WHERE fu.file_upload_id IN (
+                    SELECT value
+                    FROM json_each(
+                        CASE
+                            WHEN json_valid(
+                                '[' ||
+                                REPLACE(
+                                    REPLACE(pd.file_upload_ids, '{', ''),
+                                    '}', ''
+                                )
+                                || ']'
+                            )
+                            THEN
+                                '[' ||
+                                REPLACE(
+                                    REPLACE(pd.file_upload_ids, '{', ''),
+                                    '}', ''
+                                )
+                                || ']'
+                            ELSE '[]'
+                        END
+                    )
+                )
+            ) AS file_upload_details
             
         FROM property_details pd
                 JOIN property_type pt ON (pd.property_type_id = pt.property_type_id)
@@ -516,19 +567,31 @@ export class PropertiesService {
     }
 
     static async PropertyLocationDropDownDetails() {
-        return ` 
-            SELECT DISTINCT ON (pl.city)
-                pl.property_location_id,
-                pl.city,
-                pl.area,
-                pl.landmark
-            FROM property_details pd
-            JOIN property_locations pl 
-                ON pd.property_location_id = pl.property_location_id
-            JOIN user_details ud 
-                ON pd.created_by = ud.id
-            WHERE ud.is_admin IS TRUE
-            ORDER BY pl.city, pl.property_location_id;`
+        return `
+            SELECT
+                property_location_id,
+                city,
+                area,
+                landmark
+            FROM (
+                SELECT
+                    pl.property_location_id,
+                    pl.city,
+                    pl.area,
+                    pl.landmark,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY pl.city
+                        ORDER BY pl.property_location_id
+                    ) AS row_num
+                FROM property_details pd
+                JOIN property_locations pl
+                    ON pd.property_location_id = pl.property_location_id
+                JOIN user_details ud
+                    ON pd.created_by = ud.id
+                WHERE ud.is_admin IS TRUE
+            )
+            WHERE row_num = 1
+            ORDER BY city, property_location_id;`
     }
 
 }
