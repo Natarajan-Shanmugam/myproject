@@ -437,21 +437,21 @@ export class PropertiesService {
 
             user_filter = `where pd.created_by = ${user_res?.id} `;
             if (input.city && input.city.toLowerCase() !== 'all') {
-                user_filter += ` AND pl.city ILIKE '%${input.city}%'`;
+                user_filter += ` AND pl.city LIKE '%${input.city}%'`;
             }
 
             //Property status filter: Sale/Rent
             if (input.property_status && input.property_status.toLowerCase() !== 'all') {
-                user_filter += ` AND ps.property_status_name ILIKE '%${input.property_status}%'`;
+                user_filter += ` AND ps.property_status_name LIKE '%${input.property_status}%'`;
             }
 
             //Property status filter: Plot, Villa etc
             if (input.property_type && input.property_type.toLowerCase() !== 'all') {
-                user_filter += ` AND pt.property_type_name ILIKE '%${input.property_type}%'`;
+                user_filter += ` AND pt.property_type_name LIKE '%${input.property_type}%'`;
             }
 
             if (input.property_title && input.property_title.toLowerCase() !== 'all') {
-                user_filter += ` AND pd.property_title ILIKE '%${input.property_title}%'`;
+                user_filter += ` AND pd.property_title LIKE '%${input.property_title}%'`;
             }
 
             const property_lists = this.parsePropertyListJsonFields(await sequelize.query(await this.PropertyListQuery(user_filter, column_filter), { type: QueryTypes.SELECT }));
