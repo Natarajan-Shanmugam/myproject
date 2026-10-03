@@ -436,8 +436,43 @@ export class PropertiesService {
             }
 
             user_filter = `where pd.created_by = ${user_res?.id} `;
+
+            //city
             if (input.city && input.city.toLowerCase() !== 'all') {
                 user_filter += ` AND pl.city LIKE '%${input.city}%'`;
+            }
+
+            //area
+            if (input.area && input.area.toLowerCase() !== 'all') {
+                user_filter += ` AND pl.area LIKE '%${input.area}%'`;
+            }
+
+            //landmark
+            if (input.landmark && input.landmark.toLowerCase() !== 'all') {
+                user_filter += ` AND pl.landmark LIKE '%${input.landmark}%'`;
+            }
+
+            //availability
+            if (input.property_available_status_name && input.property_available_status_name.toLowerCase() !== 'all') {
+                user_filter += ` AND pas.property_available_status_name LIKE '%${input.property_available_status_name}%'`;
+            }
+
+            //property price range
+            if (input.min_price && input.max_price) {
+                user_filter += ` AND pd.property_price BETWEEN ${input.min_price} AND ${input.max_price}`;
+            }
+
+            //property_area
+            if (input.min_area && input.max_area) {
+                user_filter += ` AND pd.property_area BETWEEN ${input.min_area} AND ${input.max_area}`;
+            }
+
+            if (input.date_from && input.date_to) {
+                user_filter += ` AND substr(pd.created_at, 1, 10) BETWEEN '${input.date_from}' AND '${input.date_to}' `;
+            }
+
+            if (input.negotiable !== undefined) {
+                user_filter += ` AND pd.negotiable = ${input.negotiable ? 1 : 0}`;
             }
 
             //Property status filter: Sale/Rent
@@ -515,6 +550,7 @@ export class PropertiesService {
             pd.youtube_link,
             pd.instagram_link,
             pd.property_price,
+            pd.created_at,
             ${column_filter}
             pl.city,
             pl.area,
