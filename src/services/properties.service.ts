@@ -471,9 +471,9 @@ export class PropertiesService {
                 user_filter += ` AND substr(pd.created_at, 1, 10) BETWEEN '${input.date_from}' AND '${input.date_to}' `;
             }
 
-            if (input.negotiable !== undefined) {
-                user_filter += ` AND pd.negotiable = ${input.negotiable ? 1 : 0}`;
-            }
+            // if (input.negotiable !== undefined) {
+            //     user_filter += ` AND pd.negotiable = ${input.negotiable ? 1 : 0}`;
+            // }
 
             //Property status filter: Sale/Rent
             if (input.property_status && input.property_status.toLowerCase() !== 'all') {
