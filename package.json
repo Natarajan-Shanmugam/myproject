@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts",
     "start": "nodemon src/app.ts",
-    "start:prod": "ts-node src/app.ts"
+    "start:prod": "ts-node src/app.ts",
+    "db:sync": "ts-node src/scripts/db-sync.ts"
   },
   "keywords": [],
   "author": "",

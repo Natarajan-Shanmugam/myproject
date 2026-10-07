@@ -1,0 +1,2 @@
+ALTER TABLE property_details
+ADD COLUMN is_from_admin BOOLEAN NOT NULL DEFAULT 0;
